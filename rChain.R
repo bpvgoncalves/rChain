@@ -7,6 +7,7 @@ rChainEnc <- function() {
   items_pool <- NULL
   blocks <- list()
   last_block <- NA
+  keypair <- ec_keygen("P-521")
 
   # Exposed functions
   addItem <- function(data) {
@@ -40,12 +41,19 @@ rChainEnc <- function() {
       it <- getItemPool()
       resetItemPool()
 
-      block <- list(Header = list(Id = UUIDgenerate(TRUE),
-                                  Timestamp = as.POSIXlt(Sys.time(), "UTC"),
-                                  Parent = blocks[[last_block]]$Header$Id,
-                                  Content = as.character(sha384(paste(it$Check,
-                                                                      collapse = "+"))),
-                                  Challenge = NA),
+      id <- UUIDgenerate(FALSE)
+      ts <- as.POSIXlt(Sys.time(), "UTC")
+      prt1 <- blocks[[last_block]]$Header$Id
+      prt2 <- blocks[[last_block]]$Header$Check
+      hash <- as.character(sha384(paste(it$Check, collapse = "+")))
+      ck_str <- paste(id, ts, prt1, prt2, hash, sep="+")
+      ck <- signature_create(charToRaw(ck_str), sha512, keypair)
+
+      block <- list(Header = list(Id = id,
+                                  Timestamp = ts,
+                                  Parent = prt1,
+                                  Content = hash,
+                                  Check = base64_encode(ck)),
                     Body = it)
 
       blocks <<- append(blocks, list(block))
@@ -59,12 +67,17 @@ rChainEnc <- function() {
     it <- getItemPool()
     resetItemPool()
 
-    block <- list(Header = list(Id = UUIDgenerate(TRUE),
-                                Timestamp = as.POSIXlt(Sys.time(), "UTC"),
+    id <- UUIDgenerate(FALSE)
+    ts <- as.POSIXlt(Sys.time(), "UTC")
+    hash <- as.character(sha384(paste(it$Check, collapse = "+")))
+    ck_str <- paste(id, ts, NA, hash, sep="+")
+    ck <- signature_create(charToRaw(ck_str), sha512, keypair)
+
+    block <- list(Header = list(Id = id,
+                                Timestamp = ts,
                                 Parent = NA,
-                                Content = as.character(sha384(paste(it$Check,
-                                                                    collapse = "+"))),
-                                Challenge = NA),
+                                Content = hash,
+                                Check = base64_encode(ck)),
                   Body = it)
 
     blocks <<- list(block)
@@ -75,6 +88,7 @@ rChainEnc <- function() {
     items_pool <<- NULL
   }
 
+  # Initialize chain
   init()
   return(list(addItem = addItem,
               getItemPool = getItemPool,
