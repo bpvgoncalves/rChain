@@ -12,10 +12,15 @@ rChainEnc <- function() {
   addItem <- function(data) {
 
     id <- UUIDgenerate(TRUE)
+    ts <- as.POSIXlt(Sys.time(), "UTC")
+    ck <- as.character(sha384(paste(id, ts, data, sep = "+")))
     if (is.null(items_pool)) {
-      items_pool <<- as.data.frame(list(ID = id, Content = data))
+      items_pool <<- as.data.frame(list(Id = id,
+                                        Timestamp = ts,
+                                        Content = data,
+                                        Check = ck))
     } else {
-      items_pool <<- rbind(items_pool, c(id, data))
+      items_pool <<- rbind(items_pool, list(id, ts, data, ck))
     }
   }
 
@@ -38,7 +43,7 @@ rChainEnc <- function() {
       block <- list(Header = list(Id = UUIDgenerate(TRUE),
                                   Timestamp = as.POSIXlt(Sys.time(), "UTC"),
                                   Parent = blocks[[last_block]]$Header$Id,
-                                  Content = as.character(sha384(paste(it$ID,
+                                  Content = as.character(sha384(paste(it$Check,
                                                                       collapse = "+"))),
                                   Challenge = NA),
                     Body = it)
@@ -57,7 +62,7 @@ rChainEnc <- function() {
     block <- list(Header = list(Id = UUIDgenerate(TRUE),
                                 Timestamp = as.POSIXlt(Sys.time(), "UTC"),
                                 Parent = NA,
-                                Content = as.character(sha384(paste(it$ID,
+                                Content = as.character(sha384(paste(it$Check,
                                                                     collapse = "+"))),
                                 Challenge = NA),
                   Body = it)
