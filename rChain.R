@@ -18,7 +18,7 @@ rChainEnc <- function() {
     if (is.null(items_pool)) {
       items_pool <<- as.data.frame(list(Id = id,
                                         Timestamp = ts,
-                                        Content = data,
+                                        Data = data,
                                         Check = ck))
     } else {
       items_pool <<- rbind(items_pool, list(id, ts, data, ck))
