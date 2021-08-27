@@ -27,6 +27,27 @@ rChainEnc <- function() {
     return(blocks)
   }
 
+  createBlock <- function() {
+    if (is.null(items_pool)) {
+      cat("No new items to add to block.")
+    } else {
+
+      it <- getItemPool()
+      resetItemPool()
+
+      block <- list(Header = list(Id = UUIDgenerate(TRUE),
+                                  Timestamp = as.POSIXlt(Sys.time(), "UTC"),
+                                  Parent = blocks[[last_block]]$Header$Id,
+                                  Content = as.character(sha384(paste(it$ID,
+                                                                      collapse = "+"))),
+                                  Challenge = NA),
+                    Body = it)
+
+      blocks <<- append(blocks, list(block))
+      last_block <<- last_block + 1
+    }
+  }
+
   # Internal functions
   init <- function() {
     addItem("Welcome to Genesis Block")
@@ -49,30 +70,10 @@ rChainEnc <- function() {
     items_pool <<- NULL
   }
 
-  createBlock <- function() {
-    if (is.null(items_pool)) {
-      cat("No new items to add to block.")
-    } else {
-
-      it <- getItemPool()
-      resetItemPool()
-
-      block <- list(Header = list(Id = UUIDgenerate(TRUE),
-                                  Timestamp = as.POSIXlt(Sys.time(), "UTC"),
-                                  Parent = blocks[[last_block]]$Header$Id,
-                                  Content = as.character(sha384(paste(it$ID,
-                                                                      collapse = "+"))),
-                                  Challenge = NA),
-                    Body = it)
-
-      blocks <<- append(blocks, list(block))
-      last_block <<- last_block + 1
-    }
-  }
-
   init()
   return(list(addItem = addItem,
               getItemPool = getItemPool,
+              createBlock = createBlock,
               getBlocks = getBlocks))
 }
 
