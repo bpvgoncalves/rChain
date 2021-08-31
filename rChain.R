@@ -14,7 +14,8 @@ rChainEnc <- function() {
 
     id <- UUIDgenerate(TRUE)
     ts <- as.POSIXlt(Sys.time(), "UTC")
-    ck <- as.character(sha384(paste(id, ts, data, sep = "+")))
+    ck <- as.character(sha512(paste(id, ts, data, sep = "+")))
+    ck <- base64_encode(signature_create(charToRaw(ck), sha512, keypair))
     if (is.null(items_pool)) {
       items_pool <<- as.data.frame(list(Id = id,
                                         Timestamp = ts,
