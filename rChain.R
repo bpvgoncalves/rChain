@@ -37,6 +37,11 @@ rChainEnc <- function() {
       stopifnot(length(num) == 1)
       return(blocks[num])
     }
+
+  }
+
+  getPubKey <- function() {
+    return(keypair$pubkey)
   }
 
   createBlock <- function() {
@@ -99,7 +104,8 @@ rChainEnc <- function() {
   return(list(addItem = addItem,
               getItemPool = getItemPool,
               createBlock = createBlock,
-              getBlocks = getBlocks))
+              getBlocks = getBlocks,
+              getPubKey = getPubKey))
 }
 
 rChain <- rChainEnc()
