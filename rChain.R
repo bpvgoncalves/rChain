@@ -38,7 +38,6 @@ rChainEnc <- function() {
       stopifnot(length(num) == 1)
       return(blocks[num])
     }
-
   }
 
   getPubKey <- function() {
@@ -79,6 +78,65 @@ rChainEnc <- function() {
     }
   }
 
+  validateItems <- function(items){
+    if (is.null(items)) {
+      cat("No items to validate.\n")
+    } else {
+      for (i in 1:nrow(items)) {
+        i <- items[i, ]
+        ck <- as.character(sha512(paste(i$Id, i$Timestamp, i$Data, sep = "+")))
+        chk_result <- try(signature_verify(charToRaw(ck),
+                                           base64_decode(i$Check),
+                                           sha512,
+                                           keypair$pubkey),
+                          silent = TRUE)
+        if (class(chk_result) == "try-error"){
+          cat("Failed signature validation for transaction. Id: ", i$Id, "\n")
+          return(list(Result = FALSE, Details = i$Id, At = "Item"))
+        }
+      }
+    }
+  return(list(Result = TRUE, Details = NA, At = "Item"))
+  }
+
+  validateBlock <- function(num) {
+
+    body_val <- validateItems(blocks[[num]]$Body)
+    if (body_val$Result) {
+      # Body items validated, lets check header integrity
+      ck_str <- paste(blocks[[num]]$Header$Id,
+                      blocks[[num]]$Header$Timestamp,
+                      ifelse(num == 1, NA, blocks[[num - 1]]$Header$Id),
+                      ifelse(num == 1, NA, blocks[[num - 1]]$Header$Check),
+                      blocks[[num]]$Header$Content,
+                      sep="+")
+      chk_result <- try(signature_verify(charToRaw(ck_str),
+                                         base64_decode(blocks[[num]]$Header$Check),
+                                         sha512,
+                                         keypair$pubkey),
+                        silent = TRUE)
+      if (class(chk_result) == "try-error"){
+        cat("Failed signature validation for block. Id: ", blocks[[num]]$Header$Id, "\n")
+        return(list(Result = FALSE, Details = blocks[[num]]$Header$Id, At = "Block"))
+      } else {
+        return(list(Result = TRUE, Details = NA, At = "Block"))
+      }
+    } else {
+      return(body_val)
+    }
+  }
+
+  validateChain <- function() {
+    for (b in 1:last_block) {
+      blk_val <- validateBlock(b)
+      if (!blk_val$Result) {
+        cat("Chain validation failed at block", b, "\n")
+        return(blk_val)
+      }
+    }
+    return(list(Result = TRUE, Details = NA, At = "Chain"))
+  }
+
   # Internal functions
   resetItemPool <- function() {
     items_pool <<- NULL
@@ -90,7 +148,8 @@ rChainEnc <- function() {
               getItemPool = getItemPool,
               createBlock = createBlock,
               getBlocks = getBlocks,
-              getPubKey = getPubKey))
+              getPubKey = getPubKey,
+              validateChain = validateChain))
 }
 
 rChain <- rChainEnc()
