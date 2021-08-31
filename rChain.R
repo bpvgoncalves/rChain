@@ -29,8 +29,14 @@ rChainEnc <- function() {
     return(items_pool)
   }
 
-  getBlocks <- function() {
-    return(blocks)
+  getBlocks <- function(num = NULL) {
+    if (is.null(num)) {
+      return(blocks)
+    } else {
+      stopifnot(is.numeric(num))
+      stopifnot(length(num) == 1)
+      return(blocks[num])
+    }
   }
 
   createBlock <- function() {
