@@ -2,7 +2,6 @@
 rChainEnc <- function() {
   library(openssl)
   library(uuid)
-  library(jsonlite)
 
   items_pool <- NULL
   blocks <- list()
