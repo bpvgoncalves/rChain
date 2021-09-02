@@ -88,7 +88,7 @@ rChainEnc <- function() {
   validateItems <- function(items){
     if (is.null(items)) {
       message("No items to validate.")
-    } else {rl
+    } else {
       for (i in 1:nrow(items)) {
         i <- items[i, ]
         ck <- as.character(sha512(paste(i$Id, i$Timestamp, i$Data, sep = "+")))
