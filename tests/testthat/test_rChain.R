@@ -57,5 +57,11 @@ test_that("Blocks can be retrieved", {
   expect_error(rChain$getBlocks(10), "Block number bigger than total number of blocks")
 })
 
-#
-# rChain$validateChain()$Result
+test_that("Chain can be validated", {
+  expect_silent(val <- rChain$validateChain())
+  expect_type(val, "list")
+  expect_named(val, c("Result", "Details", "At"))
+  expect_true(val$Result)
+  expect_equal(val$Details, NA)
+  expect_equal(val$At, "Chain")
+})
