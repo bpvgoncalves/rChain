@@ -5,7 +5,7 @@
 
 > *WARNING:* Proof of concept. Not ready for production use.
 
-> *WARNING:* The chain created is not persistent. Any data will be lost on environment cleanup.
+> *WARNING:* The chain created is not persistent. Any data will be lost on R environment cleanup.
 
 ### What is rChain?
 In the past few years several DLT implementations emerged. Most of them work based on Proof-of-Work algorithms, consisting in several 'adversaries' competing to solve a computationally complex puzzle. The winner has the right to 'mine' a new block.
@@ -15,9 +15,9 @@ While this allows for distributed consensus generation and distributed secure ti
 
 #### Pros
 1. Energy Efficient, since there is no need for several nodes to compete on computing a suitable hash within the required difficulty.
-2. Fast block generation, since a block can be generated almost instantaneously upon request. Precise block timing.
-3. Anyone with the public key can validate the digital signatures behind transactions/chain integrity
+2. Fast block generation, since a block can be generated almost instantaneously upon request. Precise block timing is possible.
+3. Anyone with the public key can validate the digital signatures behind transactions/chain integrity.
 
 #### Cons
 1. Not distributed.
-2. Trust limited by trust in chain owner (ie, in the chain private key owner).
+2. Trust limited by trust in chain owner (i.e., in the chain's private key owner).
