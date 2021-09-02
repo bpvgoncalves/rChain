@@ -9,7 +9,11 @@ rChainEnc <- function() {
   keypair <- ec_keygen("P-521")
 
   # Exposed functions
-  addItem <- function(data) {
+  addItem <- function(data = NULL) {
+
+    if (is.null(data)) stop("'data' is required to create a new item.")
+    if (is.na(data)) stop("'data' is required to create a new item.")
+    if (!is.character(data)) data <- as.character(data)
 
     id <- UUIDgenerate(TRUE)
     ts <- as.POSIXlt(Sys.time(), "UTC")
@@ -23,6 +27,7 @@ rChainEnc <- function() {
     } else {
       items_pool <<- rbind(items_pool, list(id, ts, data, ck))
     }
+    return(list(Result=TRUE, Id=id))
   }
 
   getItemPool <- function() {
@@ -33,8 +38,10 @@ rChainEnc <- function() {
     if (is.null(num)) {
       return(blocks)
     } else {
-      stopifnot(is.numeric(num))
-      stopifnot(length(num) == 1)
+      if(!is.numeric(num)) stop("Block number expected to be 'numeric'")
+      if(length(num) != 1) stop("Block number expected to be a scalar")
+      if(num %% 1 != 0) stop("Block number expected to be an integer")
+      if(num > last_block) stop("Block number bigger than total number of blocks")
       return(blocks[num])
     }
   }
@@ -50,7 +57,7 @@ rChainEnc <- function() {
     }
 
     if (is.null(items_pool)) {
-      cat("No new items to add to block.")
+      message("No new items to add to block.")
     } else {
 
       it <- getItemPool()
@@ -74,13 +81,14 @@ rChainEnc <- function() {
 
       blocks <<- append(blocks, list(block))
       last_block <<- last_block + 1
+      return(list(Result = TRUE, Id = id, Seq = last_block))
     }
   }
 
   validateItems <- function(items){
     if (is.null(items)) {
-      cat("No items to validate.\n")
-    } else {
+      message("No items to validate.")
+    } else {rl
       for (i in 1:nrow(items)) {
         i <- items[i, ]
         ck <- as.character(sha512(paste(i$Id, i$Timestamp, i$Data, sep = "+")))
