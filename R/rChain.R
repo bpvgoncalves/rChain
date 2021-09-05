@@ -163,6 +163,7 @@ rChain <- R6::R6Class(
       private$items_pool <<- NULL
     }
   ),
+  lock_objects = TRUE,
+  portable = FALSE,
   cloneable = FALSE,
-
   lock_class = TRUE)
